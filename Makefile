@@ -16,7 +16,7 @@ DEP = $(addprefix $(DEP_DIR)/, $(SRC:.c=.d)) # one dependency file for each sour
 TARGET:= a.out
 
 INC := -I$(TOP) \
--I$(TOP)/foo
+-I$(TOP)/foo/build/include
 
 CFLAGS := -Wall -std=c99 -O3 -Werror $(INC)
 
