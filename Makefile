@@ -9,13 +9,13 @@ DEP_DIR ?= $(BUILD_DIR)/dep
 
 
 
-SRC = $(wildcard *.c)
+SRC = $(wildcard src/*.c)
 OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
 DEP = $(addprefix $(DEP_DIR)/, $(SRC:.c=.d)) # one dependency file for each source
 
 TARGET:= a.out
 
-INC := -I$(TOP) \
+INC := -I$(TOP)/src \
 -I$(TOP)/foo/build/include
 
 CFLAGS := -Wall -std=c99 -O3 -Werror $(INC)

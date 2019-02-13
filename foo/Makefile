@@ -7,14 +7,14 @@ LIB_DIR ?= $(BUILD_DIR)/lib
 OBJ_DIR ?= $(BUILD_DIR)/obj
 DEP_DIR ?= $(BUILD_DIR)/dep
 
-SRC := $(wildcard *.c)
+SRC := $(wildcard src/*.c)
 OBJ := $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
 DEP := $(addprefix $(DEP_DIR)/, $(SRC:.c=.d)) # one dependency file for each source
 
 TARGET:= foo
 
-INC := -I$(TOP) \
--I$(TOP)/export_inc \
+INC := -I$(TOP)/src \
+-I$(TOP)/src/export_inc \
 
 CFLAGS ?= -Wall -std=c99 -O3 -Werror $(INC)
 
@@ -26,7 +26,7 @@ all: $(TARGET)
 $(TARGET): $(OBJ)
 	@mkdir -p $(LIB_DIR)
 	$(AR) rcs  $(LIB_DIR)/lib$@.a $^
-	cp -r $(TOP)/export_inc $(BUILD_DIR)/include
+	cp -r $(TOP)/src/export_inc $(BUILD_DIR)/include
 
 $(OBJ_DIR)/%.o: %.c
 	@mkdir -p  $(dir $@)
