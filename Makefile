@@ -1,7 +1,5 @@
-TOP ?= .
-
-BUILD_DIR ?= $(TOP)/build
-
+BUILD_DIR ?= build
+SRC_DIR ?= src
 
 BIN_DIR ?= $(BUILD_DIR)/bin
 OBJ_DIR ?= $(BUILD_DIR)/obj
@@ -9,48 +7,49 @@ DEP_DIR ?= $(BUILD_DIR)/dep
 
 
 
-SRC = $(wildcard src/*.c)
-OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
-DEP = $(addprefix $(DEP_DIR)/, $(SRC:.c=.d)) # one dependency file for each source
+SRC := $(wildcard $(SRC_DIR)/*.c)
+OBJ := $(addprefix $(OBJ_DIR)/, $(SRC:$(SRC_DIR)/%.c=%.o))
+DEP := $(addprefix $(DEP_DIR)/, $(SRC:$(SRC_DIR)/%.c=%.d))
 
-TARGET:= a.out
+TARGET := a.out
 
-INC := -I$(TOP)/src \
--I$(TOP)/foo/build/include
+INC := -I$(SRC_DIR) \
+-Ifoo/build/include
 
 CFLAGS := -Wall -std=c99 -O3 -Werror $(INC)
 
-LDFLAGS := -L$(TOP)/foo/build/lib -lfoo -lm
+LDFLAGS := -Lfoo/build/lib -lfoo -lm
 
 .PHONY: all
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	mkdir -p $(BIN_DIR)
+	@mkdir -p $(BIN_DIR)
 	$(CC) -o $(BIN_DIR)/$@ $^ $(LDFLAGS)
 
-
-$(OBJ_DIR)/%.o: %.c
-	mkdir -p  $(dir $@)
-	$(CC) $(CFLAGS) -o $@ -c $<
+$(OBJ_DIR)/%.o: $(DEP_DIR)/%.d
+	@mkdir -p  $(dir $@)
+	$(CC) $(CFLAGS) -o $@ -c $(@:$(OBJ_DIR)/%.o=$(SRC_DIR)/%.c)
 
 -include $(DEP)   # include all dep files in the makefile
 
 # rule to generate a dep file by using the C preprocessor
-# (see man cpp for details on the -MM and -MT options)
-$(DEP_DIR)/%.d: %.c
-	mkdir -p  $(dir $@)
-	$(CC) $(CFLAGS) $< -MM -MT $(@:.d=.o) >$@
+$(DEP_DIR)/%.d: $(SRC_DIR)/%.c
+	@mkdir -p  $(dir $@)
+	$(CC) $(CFLAGS) $< -MM -MT $(@:$(DEP_DIR)/%.d=$(OBJ_DIR)/%.o) > $@
 
 .PHONY: clang-format
 clang-format:
 	clang-format -i $(SRC) $(wildcard *.h)
 
-.PHONY: clean
-clean:
+.PHONY: cleanobj
+cleanobj:
 	rm -f $(OBJ)
 
 .PHONY: cleandep
 cleandep:
 	rm -f $(DEP)
+
+.PHONY: clean
+clean: cleanobj cleandep
 
