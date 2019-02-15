@@ -1,16 +1,18 @@
 PREFIX = /usr/local
 DBG = -g
+
 BUILD_DIR ?= build
 DESTDIR ?= $(HOME)/opt
 
 SRC_DIR ?= src
-BIN_DIR ?= $(BUILD_DIR)/bin
-OBJ_DIR ?= $(BUILD_DIR)/obj
-DEP_DIR ?= $(BUILD_DIR)/dep
+BIN_DIR := $(BUILD_DIR)/bin
+OBJ_DIR := $(BUILD_DIR)/obj
+DEP_DIR := $(BUILD_DIR)/dep
 
 
-
-SRC := $(wildcard $(SRC_DIR)/*.c)
+#SRC := $(wildcard $(SRC_DIR)/*.c)
+SRC :=$(shell find $(SRC_DIR) -name "*.c")
+HDR :=$(shell find $(SRC_DIR) -name "*.h")
 OBJ := $(addprefix $(OBJ_DIR)/, $(SRC:$(SRC_DIR)/%.c=%.o))
 DEP := $(addprefix $(DEP_DIR)/, $(SRC:$(SRC_DIR)/%.c=%.d))
 
@@ -18,6 +20,7 @@ TARGET := a.out
 
 INC := -I$(SRC_DIR) \
 -I$(DESTDIR)$(PREFIX)/include \
+
 
 CFLAGS := -Wall -std=c99 -O2 $(DBG) -Werror $(INC)
 
@@ -43,7 +46,7 @@ $(DEP_DIR)/%.d: $(SRC_DIR)/%.c
 
 .PHONY: clang-format
 clang-format:
-	clang-format -i $(SRC) $(wildcard *.h)
+	clang-format -i $(SRC) $(HDR)
 
 .PHONY: cleanobj
 cleanobj:
@@ -64,4 +67,3 @@ install: $(TARGET)
 .PHONY: uninstall
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/$(TARGET)
-
