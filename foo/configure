@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 prefix=/usr/local
+host=
 debugsym=true
 
 for arg in "$@"; do
@@ -8,7 +9,9 @@ for arg in "$@"; do
     --prefix=*)
         prefix=`echo $arg | sed 's/--prefix=//'`
         ;;
-
+    --host=*)
+        host=`echo $arg | sed 's/--host=//'`
+        ;;
     --enable-debug)
         debugsym=true;;
     --disable-debug)
@@ -28,7 +31,7 @@ done
 
 echo 'generating makefile ...'
 sed "s|@prefix@|${prefix}|" Makefile.in > Makefile
-
+sed -i "s|@host@|${host}|" Makefile
 if $debugsym; then
     sed -i 's|@dbg@|-g|' Makefile
 fi

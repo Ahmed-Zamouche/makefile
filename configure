@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 prefix=/usr/local
+host=
 debugsym=true
 
 for arg in "$@"; do
@@ -8,7 +9,9 @@ for arg in "$@"; do
     --prefix=*)
         prefix=`echo $arg | sed 's/--prefix=//'`
         ;;
-
+    --host=*)
+        host=`echo $arg | sed 's/--host=//'`
+        ;;
     --enable-debug)
         debugsym=true;;
     --disable-debug)
@@ -18,6 +21,7 @@ for arg in "$@"; do
         echo 'usage: ./configure [options]'
         echo 'options:'
         echo '  --prefix=<path>: installation prefix'
+        echo '  --host: cross compile ex: arm-none-eabi'
         echo '  --enable-debug: include debug symbols'
         echo '  --disable-debug: do not include debug symbols'
         echo 'all invalid options are silently ignored'
@@ -28,7 +32,7 @@ done
 
 echo 'generating makefile ...'
 sed "s|@prefix@|${prefix}|" Makefile.in > Makefile
-
+sed -i "s|@host@|${host}|" Makefile
 if $debugsym; then
     sed -i 's|@dbg@|-g|' Makefile
 fi
