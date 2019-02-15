@@ -2,7 +2,7 @@
 
 #include "file1.h"
 
-#include "foo_main.h"
+#include "foo/foo_main.h"
 
 int main(int argc, char **argv) {
   file1_foo();

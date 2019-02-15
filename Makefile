@@ -1,6 +1,9 @@
+PREFIX = /usr/local
+DBG = -g
 BUILD_DIR ?= build
-SRC_DIR ?= src
+DESTDIR ?= $(HOME)/opt
 
+SRC_DIR ?= src
 BIN_DIR ?= $(BUILD_DIR)/bin
 OBJ_DIR ?= $(BUILD_DIR)/obj
 DEP_DIR ?= $(BUILD_DIR)/dep
@@ -14,11 +17,11 @@ DEP := $(addprefix $(DEP_DIR)/, $(SRC:$(SRC_DIR)/%.c=%.d))
 TARGET := a.out
 
 INC := -I$(SRC_DIR) \
--Ifoo/build/include
+-I$(DESTDIR)$(PREFIX)/include \
 
-CFLAGS := -Wall -std=c99 -O3 -Werror $(INC)
+CFLAGS := -Wall -std=c99 -O2 $(DBG) -Werror $(INC)
 
-LDFLAGS := -Lfoo/build/lib -lfoo -lm
+LDFLAGS := -L$(DESTDIR)$(PREFIX)/lib -lfoo -lm
 
 .PHONY: all
 all: $(TARGET)
@@ -52,4 +55,13 @@ cleandep:
 
 .PHONY: clean
 clean: cleanobj cleandep
+
+.PHONY: install
+install: $(TARGET)
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	cp $(BIN_DIR)/$< $(DESTDIR)$(PREFIX)/bin/$(TARGET)
+
+.PHONY: uninstall
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/bin/$(TARGET)
 

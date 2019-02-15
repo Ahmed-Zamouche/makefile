@@ -1,5 +1,3 @@
-PREFIX = /usr/local
-DBG = -g
 BUILD_DIR ?= build
 DESTDIR ?= $(HOME)/opt
 

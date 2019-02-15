@@ -1,34 +1,32 @@
-PREFIX = /usr/local
-DBG = -g
 BUILD_DIR ?= build
 DESTDIR ?= $(HOME)/opt
 
 SRC_DIR ?= src
-LIB_DIR := $(BUILD_DIR)/lib
-OBJ_DIR := $(BUILD_DIR)/obj
-DEP_DIR := $(BUILD_DIR)/dep
+BIN_DIR ?= $(BUILD_DIR)/bin
+OBJ_DIR ?= $(BUILD_DIR)/obj
+DEP_DIR ?= $(BUILD_DIR)/dep
+
+
 
 SRC := $(wildcard $(SRC_DIR)/*.c)
 OBJ := $(addprefix $(OBJ_DIR)/, $(SRC:$(SRC_DIR)/%.c=%.o))
 DEP := $(addprefix $(DEP_DIR)/, $(SRC:$(SRC_DIR)/%.c=%.d))
 
-TARGET := foo
+TARGET := a.out
 
 INC := -I$(SRC_DIR) \
--I$(SRC_DIR)/export_inc \
+-I$(DESTDIR)$(PREFIX)/include \
 
-CFLAGS ?= -Wall -std=c99 -O2 $(DBG) -Werror $(INC)
+CFLAGS := -Wall -std=c99 -O2 $(DBG) -Werror $(INC)
 
-LDFLAGS ?= -lm
+LDFLAGS := -L$(DESTDIR)$(PREFIX)/lib -lfoo -lm
 
 .PHONY: all
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	@mkdir -p $(LIB_DIR)
-	@mkdir -p $(BUILD_DIR)/include
-	$(AR) rcs  $(LIB_DIR)/lib$@.a $^
-	cp -r $(SRC_DIR)/export_inc/* $(BUILD_DIR)/include
+	@mkdir -p $(BIN_DIR)
+	$(CC) -o $(BIN_DIR)/$@ $^ $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(DEP_DIR)/%.d
 	@mkdir -p  $(dir $@)
@@ -58,13 +56,10 @@ clean: cleanobj cleandep
 
 .PHONY: install
 install: $(TARGET)
-	mkdir -p $(DESTDIR)$(PREFIX)/lib
-	mkdir -p $(DESTDIR)$(PREFIX)/include/$(TARGET)
-	cp $(LIB_DIR)/lib$(TARGET).a $(DESTDIR)$(PREFIX)/lib/lib$(TARGET).a
-	cp -r $(BUILD_DIR)/include/*  $(DESTDIR)$(PREFIX)/include/$(TARGET)
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	cp $(BIN_DIR)/$< $(DESTDIR)$(PREFIX)/bin/$(TARGET)
 
 .PHONY: uninstall
 uninstall:
-	rm -f $(DESTDIR)$(PREFIX)/lib/lib$(TARGET).a
-	rm -rf $(DESTDIR)$(PREFIX)/include/$(TARGET)
+	rm -f $(DESTDIR)$(PREFIX)/bin/$(TARGET)
 
